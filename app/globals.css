@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f9fafb;
+  --surface: #f3f4f6;
+  --foreground: #111827;
+  --card: #ffffff;
+  --border: #e5e7eb;
+  --ring: #d1d5db;
+  --muted: #6b7280;
+  --muted-light: #9ca3af;
+  --primary: #f97316;
+  --primary-hover: #ea580c;
+  --primary-light: #fff7ed;
+  --primary-ring: #fdba74;
+  --accent: #10b981;
+  --accent-light: #ecfdf5;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --danger-light: #fef2f2;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-muted: var(--muted);
+  --color-muted-light: var(--muted-light);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
+  --color-primary-ring: var(--primary-ring);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-danger-light: var(--danger-light);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
