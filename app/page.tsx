@@ -52,7 +52,11 @@ export default function Home() {
     );
   }
 
-  if (!user?.bar_id) {
+  if (!user) {
+    return null;
+  }
+
+  if (!user.bar_id) {
     router.replace("/select-bar");
     return null;
   }
