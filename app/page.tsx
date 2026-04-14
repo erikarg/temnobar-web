@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts } from "@/hooks/useProducts";
@@ -18,6 +18,11 @@ export default function Home() {
   const [statusFilter, setStatusFilter] = useState<
     "ALL" | "ACTIVE" | "INACTIVE"
   >("ALL");
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string;
+    descricao_produto: string;
+  } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const filters = useMemo(
     () => ({
@@ -34,14 +39,21 @@ export default function Home() {
     router.push(`/products/${product.id}/edit`);
   };
 
-  const handleDelete = async (product: {
+  const handleDelete = (product: {
     id: string;
     descricao_produto: string;
   }) => {
-    if (!confirm(`Excluir "${product.descricao_produto}"?`)) return;
-    await deleteProduct(product.id);
-    reload();
+    setDeleteTarget(product);
   };
+
+  const confirmDelete = useCallback(async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    await deleteProduct(deleteTarget.id);
+    setDeleteTarget(null);
+    setDeleting(false);
+    reload();
+  }, [deleteTarget, reload]);
 
   if (authLoading) {
     return (
@@ -173,6 +185,39 @@ export default function Home() {
           </div>
         )}
       </main>
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+          <div className="mx-4 w-full max-w-sm rounded-2xl border border-border bg-white p-6 shadow-xl">
+            <h2 className="text-base font-semibold text-foreground">
+              Excluir produto
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              Tem certeza que deseja excluir{" "}
+              <span className="font-medium text-foreground">
+                &ldquo;{deleteTarget.descricao_produto}&rdquo;
+              </span>
+              ? Esta ação não pode ser desfeita.
+            </p>
+            <div className="mt-5 flex gap-3 justify-end">
+              <Button
+                variant="secondary"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="danger"
+                onClick={confirmDelete}
+                loading={deleting}
+              >
+                Excluir
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
