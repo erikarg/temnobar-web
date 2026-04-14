@@ -4,16 +4,14 @@ import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { uploadImage } from "@/services/upload.service";
 import { createProduct, updateProduct } from "@/services/product.service";
+import { API_BASE } from "@/services/api";
 import type { Product } from "@/types/product";
 import { ChevronDown } from "lucide-react";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace("/api/v1", "") ?? "";
 
 const schema = z.object({
   codigo_produto: z.string().min(1, "Código obrigatório"),
@@ -36,7 +34,11 @@ export function ProductForm({ product, barId }: Props) {
   const [imageUrl, setImageUrl] = useState(product?.foto_produto ?? "");
   const [thumbUrl, setThumbUrl] = useState(product?.thumb_produto ?? "");
   const [preview, setPreview] = useState<string | null>(
-    product?.thumb_produto ? `${API_BASE}${product.thumb_produto}` : null,
+    product?.thumb_produto
+      ? product.thumb_produto.startsWith("http")
+        ? product.thumb_produto
+        : `${API_BASE}${product.thumb_produto}`
+      : null,
   );
 
   const {
@@ -131,7 +133,7 @@ export function ProductForm({ product, barId }: Props) {
           className="relative flex h-44 w-44 cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-border bg-surface transition-all hover:border-primary/50 hover:bg-primary-light"
         >
           {preview ? (
-            <Image src={preview} alt="Preview" fill className="object-cover" />
+            <img src={preview} alt="Preview" className="absolute inset-0 h-full w-full object-cover" />
           ) : (
             <div className="text-center text-muted-light">
               <svg

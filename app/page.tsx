@@ -8,9 +8,8 @@ import { ProductCard } from "@/components/ProductCard";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/Button";
 import { deleteProduct } from "@/services/product.service";
+import { API_BASE } from "@/services/api";
 import { ChevronDown } from "lucide-react";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace("/api/v1", "") ?? "";
 
 export default function Home() {
   const router = useRouter();

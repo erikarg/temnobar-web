@@ -12,7 +12,9 @@ type Props = {
 
 export function ProductCard({ product, apiUrl, onEdit, onDelete }: Props) {
   const thumbSrc = product.thumb_produto
-    ? `${apiUrl}${product.thumb_produto}`
+    ? product.thumb_produto.startsWith("http")
+      ? product.thumb_produto
+      : `${apiUrl}${product.thumb_produto}`
     : null;
   const isActive = product.status === "ACTIVE";
 
