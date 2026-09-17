@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +12,10 @@ import { createProduct, updateProduct } from "@/services/product.service";
 import { API_BASE } from "@/services/api";
 import type { Product } from "@/types/product";
 import { ChevronDown } from "lucide-react";
+
+// Espelham os limites aplicados pela API (multer: 5 MB, apenas imagens).
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const schema = z.object({
   codigo_produto: z.string().min(1, "Código obrigatório"),
@@ -29,6 +33,7 @@ type Props = {
 export function ProductForm({ product, barId }: Props) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const objectUrlRef = useRef<string | null>(null);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState(product?.foto_produto ?? "");
@@ -54,11 +59,34 @@ export function ProductForm({ product, barId }: Props) {
     },
   });
 
+  // Object URLs precisam ser liberados: sem isso cada troca de imagem vaza memoria.
+  useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+    };
+  }, []);
+
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setPreview(URL.createObjectURL(file));
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      setError("Formato não suportado. Use JPG, PNG ou WebP.");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_BYTES) {
+      setError("Imagem muito grande. O limite é 5 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+    const objectUrl = URL.createObjectURL(file);
+    objectUrlRef.current = objectUrl;
+
+    setPreview(objectUrl);
     setUploading(true);
     setError("");
 
@@ -128,11 +156,14 @@ export function ProductForm({ product, barId }: Props) {
         <label className="block text-sm font-medium text-foreground mb-2">
           Foto do produto
         </label>
-        <div
+        <button
+          type="button"
           onClick={() => fileInputRef.current?.click()}
           className="relative flex h-44 w-44 cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-border bg-surface transition-all hover:border-primary/50 hover:bg-primary-light"
         >
           {preview ? (
+            // next/image nao otimiza blob: URLs do preview local.
+            // eslint-disable-next-line @next/next/no-img-element
             <img src={preview} alt="Preview" className="absolute inset-0 h-full w-full object-cover" />
           ) : (
             <div className="text-center text-muted-light">
@@ -157,11 +188,11 @@ export function ProductForm({ product, barId }: Props) {
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             </div>
           )}
-        </div>
+        </button>
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept={ACCEPTED_IMAGE_TYPES.join(",")}
           onChange={handleImageChange}
           className="hidden"
         />

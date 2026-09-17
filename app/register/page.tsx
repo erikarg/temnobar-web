@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/Button";
 const schema = z.object({
   name: z.string().min(2, "Nome obrigatório"),
   email: z.string().email("Email inválido"),
-  password: z.string().min(6, "Mínimo 6 caracteres"),
+  password: z.string().min(8, "Mínimo 8 caracteres"),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -33,11 +33,10 @@ export default function RegisterPage() {
     try {
       await registerUser(data);
       router.push("/select-bar");
-    } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || "Erro ao criar conta";
-      setError(message);
+    } catch {
+      // Mensagem unica de proposito: repassar o erro da API revelaria se o
+      // e-mail ja esta cadastrado (enumeracao de contas).
+      setError("Não foi possível criar a conta. Verifique os dados e tente novamente.");
     }
   };
 
@@ -92,7 +91,7 @@ export default function RegisterPage() {
             id="password"
             label="Senha"
             type="password"
-            placeholder="Mínimo 6 caracteres"
+            placeholder="Mínimo 8 caracteres"
             autoComplete="new-password"
             error={errors.password?.message}
             {...register("password")}

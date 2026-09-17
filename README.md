@@ -156,6 +156,7 @@ temnobar-web/
 | `npm run build` | Gera o build de produção |
 | `npm start` | Executa o build de produção |
 | `npm run lint` | Verifica o código com ESLint |
+| `npm run typecheck` | Checa os tipos com o TypeScript |
 
 ---
 

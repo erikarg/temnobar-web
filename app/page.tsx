@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts } from "@/hooks/useProducts";
@@ -15,6 +15,7 @@ export default function Home() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "ALL" | "ACTIVE" | "INACTIVE"
   >("ALL");
@@ -23,17 +24,25 @@ export default function Home() {
     descricao_produto: string;
   } | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
-  const filters = useMemo(
-    () => ({
-      bar_id: user?.bar_id ?? undefined,
-      status: statusFilter === "ALL" ? undefined : statusFilter,
-      search: search || undefined,
-    }),
-    [user?.bar_id, statusFilter, search],
-  );
+  // Evita uma requisicao por tecla digitada.
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
 
-  const { products, loading, meta, reload } = useProducts(filters);
+  useEffect(() => {
+    if (!authLoading && user && !user.bar_id) {
+      router.replace("/select-bar");
+    }
+  }, [authLoading, user, router]);
+
+  const { products, loading, error, meta, reload } = useProducts({
+    bar_id: user?.bar_id ?? undefined,
+    status: statusFilter === "ALL" ? undefined : statusFilter,
+    search: debouncedSearch || undefined,
+  });
 
   const handleEdit = (product: { id: string }) => {
     router.push(`/products/${product.id}/edit`);
@@ -43,17 +52,34 @@ export default function Home() {
     id: string;
     descricao_produto: string;
   }) => {
+    setDeleteError("");
     setDeleteTarget(product);
   };
 
   const confirmDelete = useCallback(async () => {
     if (!deleteTarget) return;
     setDeleting(true);
-    await deleteProduct(deleteTarget.id);
-    setDeleteTarget(null);
-    setDeleting(false);
-    reload();
+    setDeleteError("");
+    try {
+      await deleteProduct(deleteTarget.id);
+      setDeleteTarget(null);
+      reload();
+    } catch {
+      setDeleteError("Não foi possível excluir o produto. Tente novamente.");
+    } finally {
+      setDeleting(false);
+    }
   }, [deleteTarget, reload]);
+
+  // Fecha o modal com Esc.
+  useEffect(() => {
+    if (!deleteTarget) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !deleting) setDeleteTarget(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [deleteTarget, deleting]);
 
   if (authLoading) {
     return (
@@ -63,12 +89,7 @@ export default function Home() {
     );
   }
 
-  if (!user) {
-    return null;
-  }
-
-  if (!user.bar_id) {
-    router.replace("/select-bar");
+  if (!user?.bar_id) {
     return null;
   }
 
@@ -79,7 +100,7 @@ export default function Home() {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-lg font-semibold text-foreground">Produtos</h1>
-            {!loading && (
+            {!loading && !error && (
               <p className="mt-0.5 text-sm text-muted">
                 {meta.total} {meta.total === 1 ? "produto" : "produtos"}
               </p>
@@ -136,6 +157,18 @@ export default function Home() {
           <div className="flex items-center justify-center py-24">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-white py-20">
+            <p className="text-sm font-medium text-foreground">
+              Não foi possível carregar os produtos
+            </p>
+            <p className="mt-1 text-sm text-muted">
+              Verifique sua conexão e tente novamente
+            </p>
+            <Button className="mt-5" variant="secondary" onClick={reload}>
+              Tentar novamente
+            </Button>
+          </div>
         ) : products.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-white py-20">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface text-muted-light">
@@ -188,8 +221,16 @@ export default function Home() {
 
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
-          <div className="mx-4 w-full max-w-sm rounded-2xl border border-border bg-white p-6 shadow-xl">
-            <h2 className="text-base font-semibold text-foreground">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-dialog-title"
+            className="mx-4 w-full max-w-sm rounded-2xl border border-border bg-white p-6 shadow-xl"
+          >
+            <h2
+              id="delete-dialog-title"
+              className="text-base font-semibold text-foreground"
+            >
               Excluir produto
             </h2>
             <p className="mt-2 text-sm text-muted">
@@ -199,11 +240,17 @@ export default function Home() {
               </span>
               ? Esta ação não pode ser desfeita.
             </p>
+            {deleteError && (
+              <p className="mt-3 rounded-lg bg-danger-light px-3 py-2.5 text-sm text-danger">
+                {deleteError}
+              </p>
+            )}
             <div className="mt-5 flex gap-3 justify-end">
               <Button
                 variant="secondary"
                 onClick={() => setDeleteTarget(null)}
                 disabled={deleting}
+                autoFocus
               >
                 Cancelar
               </Button>

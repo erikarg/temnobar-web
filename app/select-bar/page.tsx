@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getBars, createBar } from "@/services/bar.service";
 import { selectBar } from "@/services/auth.service";
+import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import type { Bar } from "@/types/bar";
@@ -26,6 +27,7 @@ export default function SelectBarPage() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const { refresh } = useAuth();
 
   useEffect(() => {
     getBars()
@@ -39,6 +41,7 @@ export default function SelectBarPage() {
     setError("");
     try {
       await selectBar(barId);
+      await refresh();
       router.push("/");
     } catch {
       setError("Erro ao selecionar bar");
@@ -58,6 +61,7 @@ export default function SelectBarPage() {
         slug: slugify(newBarName),
       });
       await selectBar(bar.id);
+      await refresh();
       router.push("/");
     } catch (err: unknown) {
       const message =
