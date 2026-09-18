@@ -19,13 +19,17 @@ export const api = axios.create({
 
 const PUBLIC_PATHS = ["/login", "/register"];
 
+function isPublicPath(pathname: string): boolean {
+  return PUBLIC_PATHS.includes(pathname) || pathname.startsWith("/cardapio/");
+}
+
 // Sessao expirada volta para o login em vez de virar erro generico na tela.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error?.response?.status === 401 && typeof window !== "undefined") {
       const { pathname } = window.location;
-      if (!PUBLIC_PATHS.includes(pathname)) {
+      if (!isPublicPath(pathname)) {
         window.location.replace("/login");
       }
     }

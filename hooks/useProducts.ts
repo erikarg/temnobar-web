@@ -8,9 +8,10 @@ type Filters = {
   bar_id?: string;
   status?: "ACTIVE" | "INACTIVE";
   search?: string;
+  category_id?: string;
 };
 
-export function useProducts({ bar_id, status, search }: Filters = {}) {
+export function useProducts({ bar_id, status, search, category_id }: Filters = {}) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -20,7 +21,13 @@ export function useProducts({ bar_id, status, search }: Filters = {}) {
     if (!bar_id) return;
     setLoading(true);
     try {
-      const res = await getProducts({ bar_id, status, search, per_page: 50 });
+      const res = await getProducts({
+        bar_id,
+        status,
+        search,
+        category_id,
+        per_page: 50,
+      });
       setProducts(res.data);
       setMeta(res.meta);
       setError(false);
@@ -31,7 +38,7 @@ export function useProducts({ bar_id, status, search }: Filters = {}) {
     } finally {
       setLoading(false);
     }
-  }, [bar_id, status, search]);
+  }, [bar_id, status, search, category_id]);
 
   useEffect(() => {
     loadProducts();

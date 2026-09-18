@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { register as registerUser } from "@/services/auth.service";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { CircleAlert } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 
@@ -41,31 +42,27 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="flex flex-1 items-center justify-center px-4">
+    <main className="flex flex-1 items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary shadow-sm shadow-primary/25">
-            <span className="text-lg font-bold text-white">T</span>
-          </div>
-          <h1 className="text-xl font-semibold text-foreground">
-            Criar sua conta
-          </h1>
-          <p className="mt-1 text-sm text-muted">
-            Comece a gerenciar seu bar agora
+        <div className="mb-8 flex flex-col items-center gap-3 text-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-primary font-display text-[26px] text-primary-ink">
+            T
+          </span>
+          <h1 className="font-display text-[34px] leading-tight">Criar conta do bar</h1>
+          <p className="text-sm text-muted">
+            Em um minuto seu cardápio está no ar.
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="space-y-5 rounded-2xl border border-border bg-white p-6 shadow-sm"
+          className="flex flex-col gap-4 rounded-[14px] border border-border bg-card p-6"
         >
           {error && (
-            <div className="flex items-center gap-2 rounded-lg bg-danger-light px-3 py-2.5 text-sm text-danger">
-              <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-              </svg>
+            <p className="flex items-center gap-2 rounded-[10px] border border-danger/50 bg-danger-light px-3 py-2.5 text-sm text-danger-text">
+              <CircleAlert className="h-4 w-4 shrink-0" />
               {error}
-            </div>
+            </p>
           )}
 
           <Input
@@ -79,9 +76,9 @@ export default function RegisterPage() {
 
           <Input
             id="email"
-            label="Email"
+            label="E-mail"
             type="email"
-            placeholder="seu@email.com"
+            placeholder="voce@bar.com.br"
             autoComplete="email"
             error={errors.email?.message}
             {...register("email")}
@@ -104,10 +101,7 @@ export default function RegisterPage() {
 
         <p className="mt-6 text-center text-sm text-muted">
           Já tem conta?{" "}
-          <Link
-            href="/login"
-            className="font-medium text-primary hover:text-primary-hover transition-colors"
-          >
+          <Link href="/login" className="font-semibold text-primary hover:text-primary-hover">
             Fazer login
           </Link>
         </p>

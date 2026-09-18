@@ -1,28 +1,39 @@
 @import "tailwindcss";
 
+/* Identidade Balcão: madeira escura, luz âmbar, verde e vinho só para estado. */
 :root {
-  --background: #f9fafb;
-  --surface: #f3f4f6;
-  --foreground: #111827;
-  --card: #ffffff;
-  --border: #e5e7eb;
-  --ring: #d1d5db;
-  --muted: #6b7280;
-  --muted-light: #9ca3af;
-  --primary: #f97316;
-  --primary-hover: #ea580c;
-  --primary-light: #fff7ed;
-  --primary-ring: #fdba74;
-  --accent: #10b981;
-  --accent-light: #ecfdf5;
-  --danger: #ef4444;
-  --danger-hover: #dc2626;
-  --danger-light: #fef2f2;
+  color-scheme: dark;
+
+  --background: #14110d;
+  --surface: #1e1a15;
+  --elevated: #2a241c;
+  --foreground: #f6f0e4;
+  --card: #1e1a15;
+  --border: #3b3229;
+  --ring: #f2b33d;
+  --muted: #c3b6a2;
+  --muted-light: #8c7f6c;
+
+  --primary: #f2b33d;
+  --primary-hover: #d9971f;
+  --primary-light: #251e14;
+  --primary-ring: #f2b33d;
+  --primary-ink: #14110d;
+
+  --accent: #4fa45f;
+  --accent-text: #7cc08b;
+  --accent-light: rgba(79, 164, 95, 0.14);
+
+  --danger: #a93a28;
+  --danger-hover: #8f3021;
+  --danger-text: #e8785f;
+  --danger-light: rgba(169, 58, 40, 0.16);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-border: var(--border);
@@ -33,17 +44,31 @@
   --color-primary-hover: var(--primary-hover);
   --color-primary-light: var(--primary-light);
   --color-primary-ring: var(--primary-ring);
+  --color-primary-ink: var(--primary-ink);
   --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
   --color-accent-light: var(--accent-light);
   --color-danger: var(--danger);
   --color-danger-hover: var(--danger-hover);
+  --color-danger-text: var(--danger-text);
   --color-danger-light: var(--danger-light);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-schibsted);
+  --font-mono: var(--font-jetbrains);
+  --font-display: var(--font-instrument);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* O cardápio público é a única superfície que também é lida de dia, em pé,
+   no sol da calçada: mantém o fundo escuro, mas com contraste reforçado. */
+.menu-public {
+  background-image: radial-gradient(
+    900px 420px at 80% -10%,
+    rgba(242, 179, 61, 0.1),
+    rgba(20, 17, 13, 0)
+  );
 }

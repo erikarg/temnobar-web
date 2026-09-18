@@ -64,32 +64,27 @@ A aplicação estará disponível em `http://localhost:3000`.
 ```
 temnobar-web/
 ├── app/                   # Páginas (App Router)
-│   ├── layout.tsx         #   Layout raiz
-│   ├── page.tsx           #   Lista de produtos (home)
+│   ├── layout.tsx         #   Layout raiz + AuthProvider
+│   ├── page.tsx           #   Cardápio (lista, filtros, painel de edição)
 │   ├── login/             #   Tela de login
 │   ├── register/          #   Tela de registro
 │   ├── select-bar/        #   Seleção/criação de bar
-│   └── products/
-│       ├── new/           #   Cadastro de produto
-│       └── [id]/edit/     #   Edição de produto
-├── components/            # Componentes reutilizáveis
+│   ├── categorias/        #   Seções do cardápio
+│   ├── saude/             #   Saúde do cardápio
+│   ├── qr/                #   QR code e link público
+│   ├── cardapio/[slug]/   #   Cardápio público (server component)
+│   └── products/          #   Rotas antigas, redirecionam para o painel
+├── components/            # Componentes
 │   ├── ui/                #   Primitivos (Input, Button)
-│   ├── Navbar.tsx         #   Barra de navegação
-│   ├── ProductCard.tsx    #   Card de produto
-│   └── ProductForm.tsx    #   Formulário de produto (criar/editar)
-├── hooks/                 # Hooks customizados
-│   ├── useAuth.ts         #   Estado de autenticação
-│   └── useProducts.ts     #   Listagem com filtros
-├── services/              # Camada de comunicação com a API
-│   ├── api.ts             #   Instância Axios
-│   ├── auth.service.ts    #   Login, registro, logout
-│   ├── bar.service.ts     #   Listagem e criação de bares
-│   ├── product.service.ts #   CRUD de produtos
-│   └── upload.service.ts  #   Upload de imagens
-└── types/                 # Definições de tipos
-    ├── user.ts
-    ├── bar.ts
-    └── product.ts
+│   ├── AppShell.tsx       #   Rail, troca de bar e navegação inferior
+│   ├── AuthProvider.tsx   #   Sessão compartilhada
+│   ├── ProductCard.tsx    #   Card com preço, etiquetas e disponibilidade
+│   ├── ProductSheet.tsx   #   Painel lateral de criação/edição
+│   └── TagChip.tsx        #   Etiqueta de item
+├── hooks/                 # useAuth, useProducts
+├── lib/                   # money.ts (centavos), tags.ts (vocabulário)
+├── services/              # api, auth, bar, category, product, upload, menu
+└── types/                 # user, bar, category, product, menu
 ```
 
 ---
@@ -109,29 +104,39 @@ temnobar-web/
 - Criação de novo bar com geração automática de slug
 - Vinculação do usuário ao bar selecionado
 
-### Catálogo de Produtos
+### Cardápio
 
-- Listagem em grid responsivo (2/3/4 colunas)
-- Busca por descrição em tempo real
-- Filtro por status (Ativo / Inativo)
-- Contagem total de produtos
-- Estado vazio com ação contextual
-
-### CRUD de Produtos
-
-- Formulário de criação e edição com os mesmos componentes
-- Upload de imagem com preview instantâneo
-- Conversão automática para WebP e geração de thumbnail (via API)
-- Exibição de thumbnail no card do produto
+- Listagem em grid com busca, filtro por situação e por seção
+- Preço por item (centavos na API, exibição em reais)
+- Etiquetas de vocabulário fechado (sem álcool, low ABV, vegetariano, autoral…)
+- Disponibilidade em um toque, direto no card, com registro de histórico
+- Seleção múltipla para marcar vários itens como esgotados de uma vez
+- Criação e edição em painel lateral, sem sair da lista
 - Exclusão com confirmação
+
+### Seções
+
+- Criação com slug derivado do nome
+- Reordenação, que define a ordem do cardápio público
+- Excluir a seção não apaga itens: eles voltam para "Outros"
+
+### Cardápio público
+
+- Página server-rendered em `/cardapio/:slug`, com metadata para busca
+- Item esgotado permanece na carta, marcado como indisponível
+- QR code e link prontos para mesa e bio
+
+### Saúde do cardápio
+
+- Itens sem foto, sem preço, sem seção e nunca editados
+- Ranking dos itens que mais esgotam nos últimos 30 dias
 
 ### Design
 
-- Paleta moderna com orange como cor primária e grays neutros
-- Componentes com sombras sutis, bordas arredondadas e transições
-- Cards de produto com indicador visual de status (dot verde/cinza)
-- Ações de editar/excluir visíveis no hover
-- Layout responsivo e consistente em todas as telas
+Identidade **Balcão**: fundo escuro quente (`#14110D`), âmbar como única cor de
+ação (`#F2B33D`), verde e vinho reservados a estado. Instrument Serif no display,
+Schibsted Grotesk na interface e JetBrains Mono em código e preço. Alvo de toque
+mínimo de 44px, pensado para uso em pé e com pouca luz.
 
 ---
 
@@ -141,10 +146,12 @@ temnobar-web/
 |------|-----------|:------------:|
 | `/login` | Tela de login | — |
 | `/register` | Tela de registro | — |
+| `/cardapio/:slug` | Cardápio público do bar (indexável) | — |
 | `/select-bar` | Seleção ou criação de bar | Cookie |
-| `/` | Lista de produtos do bar | Cookie |
-| `/products/new` | Cadastro de novo produto | Cookie |
-| `/products/:id/edit` | Edição de produto existente | Cookie |
+| `/` | Cardápio do bar, com painel de edição em `?item=` | Cookie |
+| `/categorias` | Seções do cardápio | Cookie |
+| `/saude` | Saúde do cardápio | Cookie |
+| `/qr` | QR code e link público | Cookie |
 
 ---
 

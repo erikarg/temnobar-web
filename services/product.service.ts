@@ -3,12 +3,15 @@ import type {
   Product,
   CreateProductInput,
   UpdateProductInput,
+  ProductStatus,
+  MenuHealth,
 } from "@/types/product";
 
 type ListProductsParams = {
   bar_id?: string;
-  status?: "ACTIVE" | "INACTIVE";
+  status?: ProductStatus;
   search?: string;
+  category_id?: string;
   page?: number;
   per_page?: number;
 };
@@ -47,4 +50,19 @@ export async function updateProduct(
 
 export async function deleteProduct(id: string): Promise<void> {
   await api.delete(`/products/${id}`);
+}
+
+// Ação de um toque no balcão: não passa pelo formulário e fica registrada no
+// histórico de disponibilidade da API.
+export async function setProductStatus(
+  id: string,
+  status: ProductStatus,
+): Promise<Product> {
+  const res = await api.patch(`/products/${id}/status`, { status });
+  return res.data.data;
+}
+
+export async function getMenuHealth(): Promise<MenuHealth> {
+  const res = await api.get("/products/health");
+  return res.data.data;
 }

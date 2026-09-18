@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronRight, CircleAlert, Plus } from "lucide-react";
 import { getBars, createBar } from "@/services/bar.service";
 import { selectBar } from "@/services/auth.service";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,7 +14,7 @@ function slugify(text: string): string {
   return text
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 }
@@ -31,7 +32,7 @@ export default function SelectBarPage() {
 
   useEffect(() => {
     getBars()
-      .then((data) => setBars(data))
+      .then(setBars)
       .catch(() => setError("Erro ao carregar bares"))
       .finally(() => setLoading(false));
   }, []);
@@ -64,10 +65,12 @@ export default function SelectBarPage() {
       await refresh();
       router.push("/");
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || "Erro ao criar bar";
-      setError(message);
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      setError(
+        status === 409
+          ? "Já existe um bar com esse nome."
+          : "Não foi possível criar o bar.",
+      );
       setCreating(false);
     }
   };
@@ -81,118 +84,102 @@ export default function SelectBarPage() {
   }
 
   return (
-    <main className="flex flex-1 items-center justify-center px-4">
+    <main className="flex flex-1 items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary shadow-sm shadow-primary/25">
-            <span className="text-lg font-bold text-white">T</span>
-          </div>
-          <h1 className="text-xl font-semibold text-foreground">
-            Selecione um bar
-          </h1>
-          <p className="mt-1 text-sm text-muted">
-            Escolha um bar existente ou crie um novo
+        <div className="mb-8 flex flex-col items-center gap-3 text-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-primary font-display text-[26px] text-primary-ink">
+            T
+          </span>
+          <h1 className="font-display text-[34px] leading-tight">Escolha o bar</h1>
+          <p className="text-sm text-muted">
+            O cardápio que você vai abrir depende do bar selecionado.
           </p>
         </div>
 
         {error && (
-          <div className="mb-4 flex items-center gap-2 rounded-lg bg-danger-light px-3 py-2.5 text-sm text-danger">
-            <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-            </svg>
+          <p className="mb-4 flex items-center gap-2 rounded-[10px] border border-danger/50 bg-danger-light px-3 py-2.5 text-sm text-danger-text">
+            <CircleAlert className="h-4 w-4 shrink-0" />
             {error}
-          </div>
+          </p>
         )}
 
         {bars.length > 0 && (
-          <div className="mb-6 space-y-2">
+          <ul className="mb-6 flex flex-col gap-2">
             {bars.map((bar) => (
-              <button
-                key={bar.id}
-                onClick={() => handleSelect(bar.id)}
-                disabled={selecting !== null}
-                className="flex w-full items-center justify-between rounded-xl border border-border bg-white px-4 py-3.5 text-left shadow-sm transition-all hover:border-primary/40 hover:shadow-md disabled:opacity-50 cursor-pointer"
-              >
-                <div>
-                  <p className="font-medium text-foreground">{bar.nome}</p>
-                  <p className="mt-0.5 text-xs text-muted-light">{bar.slug}</p>
-                </div>
-                {selecting === bar.id ? (
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                ) : (
-                  <svg className="h-4 w-4 text-muted-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                  </svg>
-                )}
-              </button>
+              <li key={bar.id}>
+                <button
+                  type="button"
+                  onClick={() => handleSelect(bar.id)}
+                  disabled={selecting !== null}
+                  className="flex w-full cursor-pointer items-center justify-between rounded-[14px] border border-border bg-card px-4 py-3.5 text-left transition-colors hover:border-primary/50 disabled:opacity-50"
+                >
+                  <span className="flex flex-col">
+                    <span className="font-medium">{bar.nome}</span>
+                    <span className="mt-0.5 font-mono text-[11.5px] text-muted-light">
+                      {bar.slug}
+                    </span>
+                  </span>
+                  {selecting === bar.id ? (
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-muted-light" />
+                  )}
+                </button>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
 
         {bars.length === 0 && !showCreate && (
           <p className="mb-6 text-center text-sm text-muted">
-            Nenhum bar disponível. Crie o primeiro!
+            Nenhum bar cadastrado ainda. Crie o primeiro.
           </p>
         )}
 
-        <div className="relative">
-          {bars.length > 0 && !showCreate && (
-            <div className="mb-4 flex items-center gap-3">
-              <div className="h-px flex-1 bg-border" />
-              <span className="text-xs text-muted-light">ou</span>
-              <div className="h-px flex-1 bg-border" />
+        {!showCreate ? (
+          <Button
+            variant="secondary"
+            onClick={() => setShowCreate(true)}
+            className="w-full"
+          >
+            <Plus className="h-4 w-4" />
+            Criar novo bar
+          </Button>
+        ) : (
+          <form
+            onSubmit={handleCreate}
+            className="flex flex-col gap-4 rounded-[14px] border border-border bg-card p-5"
+          >
+            <h2 className="text-sm font-semibold">Novo bar</h2>
+            <Input
+              id="bar-name"
+              label="Nome do bar"
+              placeholder="Ex: Boteco do Zé"
+              value={newBarName}
+              onChange={(e) => setNewBarName(e.target.value)}
+              hint={
+                newBarName
+                  ? `O cardápio público ficará em /cardapio/${slugify(newBarName)}`
+                  : undefined
+              }
+            />
+            <div className="flex gap-2.5">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  setShowCreate(false);
+                  setNewBarName("");
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" loading={creating} className="flex-1">
+                Criar e selecionar
+              </Button>
             </div>
-          )}
-
-          {!showCreate ? (
-            <Button
-              variant="secondary"
-              onClick={() => setShowCreate(true)}
-              className="w-full"
-            >
-              + Criar novo bar
-            </Button>
-          ) : (
-            <form
-              onSubmit={handleCreate}
-              className="space-y-4 rounded-2xl border border-border bg-white p-6 shadow-sm"
-            >
-              <h2 className="text-sm font-semibold text-foreground">
-                Novo bar
-              </h2>
-              <Input
-                id="bar-name"
-                label="Nome do bar"
-                placeholder="Ex: Boteco do Zé"
-                value={newBarName}
-                onChange={(e) => setNewBarName(e.target.value)}
-              />
-              {newBarName && (
-                <p className="text-xs text-muted-light">
-                  Slug:{" "}
-                  <span className="rounded bg-surface px-1.5 py-0.5 font-mono text-foreground">
-                    {slugify(newBarName)}
-                  </span>
-                </p>
-              )}
-              <div className="flex gap-2 pt-1">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => {
-                    setShowCreate(false);
-                    setNewBarName("");
-                  }}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit" loading={creating} className="flex-1">
-                  Criar e selecionar
-                </Button>
-              </div>
-            </form>
-          )}
-        </div>
+          </form>
+        )}
       </div>
     </main>
   );
