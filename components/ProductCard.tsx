@@ -27,6 +27,10 @@ export function ProductCard({
   onDelete,
   onToggleStatus,
 }: Props) {
+  // Defesa contra defasagem de deploy: uma API mais antiga responde sem preco
+  // e sem tags, e ler .length de undefined derrubaria a tela inteira.
+  const tags = product.tags ?? [];
+  const preco = product.preco ?? 0;
   const thumbSrc = product.thumb_produto
     ? product.thumb_produto.startsWith("http")
       ? product.thumb_produto
@@ -106,11 +110,11 @@ export function ProductCard({
             {product.descricao_produto}
           </p>
           <p className="mt-1 font-mono text-[12.5px] text-primary">
-            {product.preco > 0 ? formatPrice(product.preco) : "sem preço"}
+            {preco > 0 ? formatPrice(preco) : "sem preço"}
           </p>
-          {product.tags.length > 0 && (
+          {tags.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
-              {product.tags.slice(0, 3).map((tag) => (
+              {tags.slice(0, 3).map((tag) => (
                 <TagChip key={tag} tag={tag} />
               ))}
             </div>
