@@ -25,6 +25,30 @@ Interface web para gestão de cardápios de bares, permitindo cadastro, edição
 
 ---
 
+## Telas
+
+| Cardápio | Painel de edição |
+|---|---|
+| ![Cardápio do bar, com preço, etiquetas e disponibilidade em cada item](docs/screenshots/cardapio.png) | ![Painel lateral de edição de um item](docs/screenshots/painel-edicao.png) |
+
+| Seções | Saúde do cardápio |
+|---|---|
+| ![Gerenciamento das seções do cardápio](docs/screenshots/secoes.png) | ![Indicadores de saúde do cardápio](docs/screenshots/saude.png) |
+
+| QR e link público | Entrada |
+|---|---|
+| ![QR code e link do cardápio público](docs/screenshots/qr-e-link.png) | ![Tela de login](docs/screenshots/login.png) |
+
+| No celular | Cardápio público no celular |
+|---|---|
+| ![Cardápio no celular, com navegação inferior](docs/screenshots/mobile-cardapio.png) | ![Cardápio público no celular](docs/screenshots/mobile-cardapio-publico.png) |
+
+O cardápio público inteiro, como o cliente vê ao ler o QR da mesa:
+
+![Cardápio público agrupado por seção, com itens indisponíveis marcados](docs/screenshots/cardapio-publico.png)
+
+---
+
 ## Início Rápido
 
 ### Pré-requisitos
