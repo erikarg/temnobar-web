@@ -15,7 +15,6 @@ import {
   setProductStatus,
 } from "@/services/product.service";
 import { getCategories } from "@/services/category.service";
-import { API_BASE } from "@/services/api";
 import type { Category } from "@/types/category";
 import type { Product, ProductStatus } from "@/types/product";
 
@@ -309,7 +308,6 @@ function Cardapio() {
               <ProductCard
                 key={product.id}
                 product={product}
-                apiUrl={API_BASE}
                 selected={selectedIds.includes(product.id)}
                 toggling={togglingId === product.id}
                 onSelect={toggleSelected}

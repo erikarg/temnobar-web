@@ -8,7 +8,6 @@ import type { Product } from "@/types/product";
 
 type Props = {
   product: Product;
-  apiUrl: string;
   selected: boolean;
   toggling?: boolean;
   onSelect: (product: Product) => void;
@@ -19,7 +18,6 @@ type Props = {
 
 export function ProductCard({
   product,
-  apiUrl,
   selected,
   toggling,
   onSelect,
@@ -31,11 +29,7 @@ export function ProductCard({
   // e sem tags, e ler .length de undefined derrubaria a tela inteira.
   const tags = product.tags ?? [];
   const preco = product.preco ?? 0;
-  const thumbSrc = product.thumb_produto
-    ? product.thumb_produto.startsWith("http")
-      ? product.thumb_produto
-      : `${apiUrl}${product.thumb_produto}`
-    : null;
+  const thumbSrc = product.thumb_produto;
   const isActive = product.status === "ACTIVE";
 
   return (

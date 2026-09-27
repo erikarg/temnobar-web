@@ -1,8 +1,5 @@
 import type { NextConfig } from "next";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3333/api/v1";
-const url = new URL(apiUrl);
-
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -24,12 +21,6 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
-      {
-        protocol: url.protocol.replace(":", "") as "http" | "https",
-        hostname: url.hostname,
-        port: url.port,
-        pathname: "/uploads/**",
-      },
       {
         protocol: "https",
         hostname: "res.cloudinary.com",

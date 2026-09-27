@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { uploadImage } from "@/services/upload.service";
 import { createProduct, updateProduct } from "@/services/product.service";
-import { API_BASE } from "@/services/api";
 import { PRODUCT_TAGS } from "@/lib/tags";
 import { formatPriceInput, parsePriceInput } from "@/lib/money";
 import type { Category } from "@/types/category";
@@ -54,11 +53,7 @@ export function ProductSheet({
   const [tags, setTags] = useState<ProductTag[]>(product?.tags ?? []);
   const [status, setStatus] = useState(product?.status ?? "ACTIVE");
   const [preview, setPreview] = useState<string | null>(
-    product?.thumb_produto
-      ? product.thumb_produto.startsWith("http")
-        ? product.thumb_produto
-        : `${API_BASE}${product.thumb_produto}`
-      : null,
+    product?.thumb_produto ?? null,
   );
 
   const {
